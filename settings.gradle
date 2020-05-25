@@ -1,0 +1,3 @@
+rootProject.name='BluecollarPrNet'
+include ':app'
+include ':LibVolley'

@@ -18,7 +18,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:text="JsonRequest" />
+        android:text="JsonRequest - 获取深圳今天的天气" />
+
+    <Button
+        android:id="@+id/btn_test_post"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Post" />
 
     <Button
         android:id="@+id/btn_test_image"
@@ -46,14 +53,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="MyXMLRequest" />
+        android:text="(My)XMLRequest" />
 
     <Button
         android:id="@+id/btn_test_myjson"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:text="MyJsonRequest" />
+        android:text="(My)JsonRequest" />
 
     <ImageView
         android:id="@+id/iv_test_image"

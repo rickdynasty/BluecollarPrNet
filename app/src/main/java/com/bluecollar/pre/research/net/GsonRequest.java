@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 
 import java.io.UnsupportedEncodingException;
 
-public class MyGsonRequest<T> extends Request<T> {
+public class GsonRequest<T> extends Request<T> {
 
     private final Listener<T> mListener;
 
@@ -19,16 +19,16 @@ public class MyGsonRequest<T> extends Request<T> {
 
     private Class<T> mClass;
 
-    public MyGsonRequest(int method, String url, Class<T> clazz, Listener<T> listener,
-                         ErrorListener errorListener) {
+    public GsonRequest(int method, String url, Class<T> clazz, Listener<T> listener,
+                       ErrorListener errorListener) {
         super(method, url, errorListener);
         mGson = new Gson();
         mClass = clazz;
         mListener = listener;
     }
 
-    public MyGsonRequest(String url, Class<T> clazz, Listener<T> listener,
-                         ErrorListener errorListener) {
+    public GsonRequest(String url, Class<T> clazz, Listener<T> listener,
+                       ErrorListener errorListener) {
         this(Method.GET, url, clazz, listener, errorListener);
     }
 

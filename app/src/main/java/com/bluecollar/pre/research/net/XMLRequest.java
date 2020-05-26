@@ -1,5 +1,7 @@
 package com.bluecollar.pre.research.net;
 
+import androidx.annotation.Nullable;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
@@ -15,16 +17,24 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-public class MyXMLRequest extends Request<XmlPullParser> {
+public class XMLRequest extends Request<XmlPullParser> {
+    private Listener<XmlPullParser> mListener;
+    /**
+     * Lock to guard mListener as it is cleared on cancel() and read on delivery.
+     */
+    private final Object mLock = new Object();
 
-    private final Listener<XmlPullParser> mListener;
-
-    public MyXMLRequest(int method, String url, Listener<XmlPullParser> listener, ErrorListener errorListener) {
+    public XMLRequest(
+            int method,
+            String url,
+            Listener<XmlPullParser> listener,
+            @Nullable ErrorListener errorListener) {
         super(method, url, errorListener);
-        mListener = listener;
+        this.mListener = listener;
     }
 
-    public MyXMLRequest(String url, Listener<XmlPullParser> listener, ErrorListener errorListener) {
+    public XMLRequest(
+            String url, Listener<XmlPullParser> listener, @Nullable ErrorListener errorListener) {
         this(Method.GET, url, listener, errorListener);
     }
 
@@ -45,7 +55,12 @@ public class MyXMLRequest extends Request<XmlPullParser> {
 
     @Override
     protected void deliverResponse(XmlPullParser response) {
-        mListener.onResponse(response);
+        Listener<XmlPullParser> listener;
+        synchronized (mLock) {
+            listener = mListener;
+        }
+        if (listener != null) {
+            listener.onResponse(response);
+        }
     }
-
 }

@@ -30,6 +30,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class MainActivity extends AppCompatActivity {
     public static final String LOG_TAG = "MainActivity";
@@ -201,7 +202,8 @@ public class MainActivity extends AppCompatActivity {
                                         case XmlPullParser.START_TAG:
                                             String nodeName = response.getName();
                                             if ("city".equals(nodeName)) {
-                                                String pName = response.getAttributeValue(0);
+                                                //解决中文乱码问题
+                                                String pName = new String(response.getAttributeValue(0).getBytes("ISO-8859-1"),"UTF-8");
                                                 Log.d("TAG", "pName is " + pName);
                                             }
                                             break;
@@ -232,7 +234,14 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onResponse(Weather weather) {
                                     WeatherInfo weatherInfo = weather.getWeatherinfo();
-                                    Log.v("TAG", "city is " + weatherInfo.getCity());
+                                    //解决中文乱码问题
+                                    String city = null;
+                                    try {
+                                        city = new String(weatherInfo.getCity().getBytes("ISO-8859-1"),"UTF-8");
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Log.v("TAG", "city is " + city);
 
                                 }
                             }, new Response.ErrorListener() {

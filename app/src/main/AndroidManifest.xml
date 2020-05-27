@@ -32,6 +32,15 @@
                 <category android:name="com.bluecollar.pre.research.category.SAMPLE_CODE" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.bluecollar.pre.research.net.activity.OkhttpTestActivity"
+            android:label="@string/activity_label_okhttp">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.bluecollar.pre.research.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

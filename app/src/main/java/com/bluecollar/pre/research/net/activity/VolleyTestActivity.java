@@ -25,9 +25,11 @@ import com.android.volley.toolbox.Volley;
 import com.bluecollar.pre.research.net.GsonRequest;
 import com.bluecollar.pre.research.net.R;
 import com.bluecollar.pre.research.net.XMLRequest;
-import com.bluecollar.pre.research.net.bean.Weather;
-import com.bluecollar.pre.research.net.bean.WeatherInfo;
+import com.bluecollar.pre.research.net.bean.TestJsonInfo;
+import com.bluecollar.pre.research.net.bean.TestJsonStruct;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -110,7 +112,7 @@ public class VolleyTestActivity extends Activity implements View.OnClickListener
                     @Override
                     public void onResponse(JSONObject arg0) {
                         Log.d("TAG", arg0.toString());
-                        Toast.makeText(VolleyTestActivity.this, "onResponse内容：" + arg0, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(VolleyTestActivity.this, getWeatherInfo(arg0), Toast.LENGTH_SHORT).show();
                     }
 
                 }, new Response.ErrorListener() {
@@ -248,12 +250,12 @@ public class VolleyTestActivity extends Activity implements View.OnClickListener
             case R.id.btn_test_myjson:
                 url = "http://www.weather.com.cn/data/sk/101010100.html";
 
-                GsonRequest<Weather> mjReq = new GsonRequest<Weather>(url, Weather.class,
-                        new Response.Listener<Weather>() {
+                GsonRequest<TestJsonStruct> mjReq = new GsonRequest<TestJsonStruct>(url, TestJsonStruct.class,
+                        new Response.Listener<TestJsonStruct>() {
 
                             @Override
-                            public void onResponse(Weather weather) {
-                                WeatherInfo weatherInfo = weather.getWeatherinfo();
+                            public void onResponse(TestJsonStruct jsonStruct) {
+                                TestJsonInfo weatherInfo = jsonStruct.getWeatherinfo();
                                 //解决中文乱码问题
                                 String city = null;
                                 try {
@@ -261,8 +263,8 @@ public class VolleyTestActivity extends Activity implements View.OnClickListener
                                 } catch (UnsupportedEncodingException e) {
                                     e.printStackTrace();
                                 }
-                                Log.v("TAG", "city is " + city);
 
+                                Toast.makeText(VolleyTestActivity.this, city + " " + weatherInfo.getTime() + " 温度是：" + weatherInfo.getTemp() + "°", Toast.LENGTH_SHORT).show();
                             }
                         }, new Response.ErrorListener() {
 
@@ -278,6 +280,30 @@ public class VolleyTestActivity extends Activity implements View.OnClickListener
                 break;
 
         }
+    }
+
+    private StringBuffer getWeatherInfo(JSONObject jsonObject) {
+        StringBuffer rltStr = new StringBuffer("");
+
+        try {
+            JSONArray results = jsonObject.getJSONArray("results");
+            JSONObject rlt = (JSONObject) results.get(0);
+            JSONObject location = rlt.getJSONObject("location");
+            if (null != location) {
+                rltStr.append(location.getString("path"));
+            }
+
+            JSONArray daily = (JSONArray) rlt.getJSONArray("daily");
+            if (null != daily && 0 < daily.length()) {
+                JSONObject dailyItem = (JSONObject) daily.get(0);
+                rltStr.append("(").append(dailyItem.getString("date")).append(")：").append(dailyItem.getString("text_day"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            rltStr.append("解析异常");
+        }
+
+        return rltStr;
     }
 
     private class MyImageCache implements ImageLoader.ImageCache {

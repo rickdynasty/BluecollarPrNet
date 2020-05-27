@@ -1,6 +1,6 @@
 package com.bluecollar.pre.research.net.bean;
 
-public class WeatherInfo {
+public class TestJsonInfo {
 
     private String city;
 

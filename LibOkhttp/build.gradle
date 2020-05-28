@@ -27,4 +27,5 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     //OkHttp
+    api 'com.squareup.okhttp3:okhttp:3.10.0'
 }

@@ -2,4 +2,5 @@
     <string name="app_name">BluecollarPrNet</string>
     <string name="activity_label_volley">Volley</string>
     <string name="activity_label_okhttp">Okhttp</string>
+    <string name="activity_label_apache">Apache</string>
 </resources>

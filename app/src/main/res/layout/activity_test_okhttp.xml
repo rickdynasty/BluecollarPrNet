@@ -18,5 +18,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:text="同步Get请求" />
+    <Button
+        android:id="@+id/btn_post_request"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Post请求" />
 
 </LinearLayout>

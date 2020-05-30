@@ -1,7 +1,9 @@
 package com.bluecollar.pre.research.net.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
@@ -9,12 +11,17 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bluecollar.pre.research.net.R;
+import com.bluecollar.pre.research.net.okhttp.FakeApiInterceptor;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
+import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -29,6 +36,7 @@ public class OkhttpTestActivity extends Activity implements View.OnClickListener
     private final int MSG_ASYNC_GET_RES = 2;
     private final int MSG_POST_RES_FAIL = 3;
     private final int MSG_POST_RES = 4;
+    private final int MSG_TEST_INTERCEPTOR = 5;
 
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
@@ -49,6 +57,9 @@ public class OkhttpTestActivity extends Activity implements View.OnClickListener
                 case MSG_POST_RES:
                     Toast.makeText(OkhttpTestActivity.this, "Post请求Success！ 内容：" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
+                case MSG_TEST_INTERCEPTOR:
+                    Toast.makeText(OkhttpTestActivity.this, "测试拦截器！ 内容：" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    break;
             }
             //处理消息
             return false;
@@ -57,7 +68,13 @@ public class OkhttpTestActivity extends Activity implements View.OnClickListener
 
     private void sureOkHttpClient() {
         if (null == okHttpClient) {
-            okHttpClient = new OkHttpClient();
+//            okHttpClient = new OkHttpClient();
+
+            Cache cache = new Cache(new File(Environment.getDataDirectory(), "cache"), 10 * 1024 * 1024);
+            okHttpClient = new OkHttpClient.Builder()
+//                    .addInterceptor(loggingInterceptor)     //
+                    .cache(cache)                           //添加缓存处理
+                    .build();
         }
     }
 
@@ -69,6 +86,7 @@ public class OkhttpTestActivity extends Activity implements View.OnClickListener
         findViewById(R.id.btn_async_get_request).setOnClickListener(this);
         findViewById(R.id.btn_sync_get_request).setOnClickListener(this);
         findViewById(R.id.btn_post_request).setOnClickListener(this);
+        findViewById(R.id.btn_test_interceptor).setOnClickListener(this);
     }
 
     @Override
@@ -91,6 +109,9 @@ public class OkhttpTestActivity extends Activity implements View.OnClickListener
                 break;
             case R.id.btn_post_request:
                 postForLoginBaidu("https://www.wanandroid.com/user/login");
+                break;
+            case R.id.btn_test_interceptor:
+                testInterceptor();
                 break;
         }
     }
@@ -176,5 +197,59 @@ public class OkhttpTestActivity extends Activity implements View.OnClickListener
                 msg.sendToTarget();
             }
         });
+    }
+
+    private void testInterceptor() {
+        //Application Interceptor能拦截所有类型的请求，包括缓存命中的请求；而Network Interceptors仅拦截非WebSocket的情况下产生真正网络访问的请求。
+        // 因此在Network Interceptors上做网络上传和下载进度的监听器是比较合适的。
+        Interceptor loggingInterceptor = new Interceptor() {
+            @SuppressLint("DefaultLocale")
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                Logger logger = Logger.getGlobal();
+                //我这里参考的是官网的，你也可以定义里自己的打印方式
+                long t1 = System.nanoTime();
+                logger.info(String.format("Sending request %s on %s%n%s", request.url(), chain.connection(), request.headers()));
+                Response response = chain.proceed(request);
+                long t2 = System.nanoTime();
+                logger.info(String.format("Received response for %s in %.1fms%n%s", response.request().url(), (t2 - t1) / 1e6d, response.headers()));
+                return response;
+            }
+        };
+
+        final String url = "https://www.httpbin.org/get?id=111";
+        FakeApiInterceptor fakeApiInterceptor = new FakeApiInterceptor();
+        fakeApiInterceptor.setApiULR(url);
+
+        //1、创建OkHttpClient实例对象
+        okHttpClient = new OkHttpClient.Builder()
+//                .addInterceptor(loggingInterceptor)
+                .addInterceptor(fakeApiInterceptor)
+                //.addNetworkInterceptor() // 添加网络拦截器
+                .build();
+
+        //2、创建Request实例对象
+        final Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+        //3、使用client执行request请求
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Response response = okHttpClient.newCall(request).execute();
+                    Message msg = Message.obtain();
+                    String body = response.body().string();
+                    msg.obj = body;
+                    msg.what = MSG_TEST_INTERCEPTOR;
+                    mHandler.sendMessage(msg);
+                    System.out.println(body);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }

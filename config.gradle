@@ -1,0 +1,19 @@
+ext {
+    versionName = "1.1.0"
+    versionCode = 110
+
+    minSdkVersion = 19
+    targetSdkVersion = 26
+    compileSdkVersion = 28
+    buildToolsVersion = '28.0.3'
+
+    // 第三方库
+    LIB_SUPPORT_APPCOMPAT_V7 = 'com.android.support:appcompat-v7:27.1.1'
+    LIB_BUGLY_CRASH_REPORT = "com.tencent.bugly:crashreport:2.6.6.1"
+    LIB_BUGLY_NATIVE_CRASH_REPORT = "com.tencent.bugly:nativecrashreport:3.3.1"
+    LIB_TEND_DATA = 'com.tendcloud:tenddata:1.4.2'
+    LIB_UMENG_COMMON = 'com.umeng.sdk:common:2.0.0'
+    LIB_UMENG_ANALYTICS = 'com.umeng.sdk:analytics:8.0.0'
+
+    LIB_GSON = 'com.google.code.gson:gson:2.8.2'
+}
